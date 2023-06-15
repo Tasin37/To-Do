@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .task-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item .task-name {
+            flex: 1;
+        }
+
+        .task-item button {
+            margin-left: 8px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .button-container button {
+            padding: 8px 12px;
+            background-color: #57AEDD;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #35E5AA;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+
+        <div id="todo-list">
+            <input type="text" id="task-input" class="task-input" placeholder="Enter a task">
+        </div>
+
+        <ul id="task-list" class="task-list"></ul>
+
+        <div class="button-container">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+    </div>
+
+    <script>
+        // Node object for linked list
+        function Node(task) {
+            this.task = task;
+            this.next = null;
+        }
+
+        // Linked list class
+        function LinkedList() {
+            this.head = null;
+            this.tail = null;
+
+            // Method to add a task to the list
+            this.addTask = function (task) {
+                var newNode = new Node(task);
+
+                if (this.head === null) {
+                    this.head = newNode;
+                    this.tail = newNode;
+                } else {
+                    this.tail.next = newNode;
+                    this.tail = newNode;
+                }
+            };
+
+            // Method to update a task in the list
+            this.updateTask = function (index, newTask) {
+                var currentNode = this.head;
+                var currentIndex = 0;
+
+                while (currentNode !== null) {
+                    if (currentIndex === index) {
+                        currentNode.task = newTask;
+                        break;
+                    }
+
+                    currentNode = currentNode.next;
+                    currentIndex++;
+                }
+            };
+
+            // Method to remove a task from the list
+            this.removeTask = function (index) {
+                if (index === 0) {
+                    this.head = this.head.next;
+                } else {
+                    var currentNode = this.head;
+                    var prevNode = null;
+                    var currentIndex = 0;
+
+                    while (currentNode !== null) {
+                        if (currentIndex === index) {
+                            prevNode.next = currentNode.next;
+
+                            if (currentNode === this.tail) {
+                                this.tail = prevNode;
+                            }
+
+                            break;
+                        }
+
+                        prevNode = currentNode;
+                        currentNode = currentNode.next;
+                        currentIndex++;
+                    }
+                }
+            };
+
+            // Method to get all tasks as an array
+            this.getAllTasks = function () {
+                var tasks = [];
+                var currentNode = this.head;
+
+                while (currentNode !== null) {
+                    tasks.push(currentNode.task);
+                    currentNode = currentNode.next;
+                }
+
+                return tasks;
+            };
+        }
+
+        // Create a new linked list
+        var linkedList = new LinkedList();
+
+        // Function to add a task
+        function addTask() {
+            var taskInput = document.getElementById("task-input");
+            var task = taskInput.value.trim();
+
+            if (task !== "") {
+                linkedList.addTask(task);
+                taskInput.value = "";
+                renderTasks();
+            }
+        }
+        // Function to update a task
+        function updateTask(index) {
+            var newTask = prompt("Enter a new task");
+
+            if (newTask !== null) {
+                linkedList.updateTask(index, newTask.trim());
+                renderTasks();
+            }
+        }
+
+        // Function to remove a task
+        function removeTask(index) {
+            linkedList.removeTask(index);
+            renderTasks();
+        }
+
+        // Function to render the task list
+        function renderTasks() {
+            var taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+
+            var tasks = linkedList.getAllTasks();
+
+            tasks.forEach(function (task, index) {
+                var listItem = document.createElement("li");
+                listItem.className = "task-item";
+
+                var taskName = document.createElement("span");
+                taskName.className = "task-name";
+                taskName.textContent = task;
+                listItem.appendChild(taskName);
+
+                var buttonContainer = document.createElement("div");
+
+                var editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.onclick = function () {
+                    updateTask(index);
+                };
+                buttonContainer.appendChild(editButton);
+
+                var removeButton = document.createElement("button");
+                removeButton.textContent = "Remove";
+                removeButton.onclick = function () {
+                    removeTask(index);
+                };
+                buttonContainer.appendChild(removeButton);
+
+                listItem.appendChild(buttonContainer);
+
+                taskList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+
+</html>
